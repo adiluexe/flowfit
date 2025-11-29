@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import '../../providers/dashboard_providers.dart';
-import '../../models/daily_stats.dart';
-import '../../models/recent_activity.dart';
-import '../../widgets/quick_mood_check_bottom_sheet.dart';
+import '../../widgets/flowy_companion.dart';
 
 class TrackScreen extends StatelessWidget {
   const TrackScreen({super.key});
@@ -28,7 +22,7 @@ class TrackScreen extends StatelessWidget {
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF2D3142),
-                  fontFamily: 'GeneralSans', // Assuming this font is available
+                  fontFamily: 'GeneralSans',
                 ),
               ),
               const SizedBox(height: 8),
@@ -44,12 +38,12 @@ class TrackScreen extends StatelessWidget {
               const SizedBox(height: 40),
 
               // Flowy Character
-              Expanded(
+              const Expanded(
                 flex: 2,
                 child: Center(
-                  child: SvgPicture.asset(
-                    'assets/flowy.svg',
-                    fit: BoxFit.contain,
+                  child: FlowyCompanion(
+                    message: "Let's get moving!",
+                    size: 200,
                   ),
                 ),
               ),
@@ -69,12 +63,7 @@ class TrackScreen extends StatelessWidget {
                       icon: Icons.fitness_center,
                       color: const Color(0xFFFF6B6B), // Coral/Red
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const RandomWorkoutScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/trackertest');
                       },
                     ),
                     
@@ -88,12 +77,7 @@ class TrackScreen extends StatelessWidget {
                       icon: Icons.directions_walk,
                       color: const Color(0xFF4ECDC4), // Teal/Green
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const WalkScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/workout/walking/options');
                       },
                     ),
                   ],
@@ -114,85 +98,28 @@ class TrackScreen extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: iconColor, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtons(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (bottomSheetContext) => QuickMoodCheckBottomSheet(
-                  onMoodSelected: () {
-                    // Navigate to workout type selection after mood is selected
-                    Navigator.of(context).pushNamed('/workout/select-type');
-                  },
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3B82F6), // Updated to primary blue
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16), // Updated to 16px border radius
-              ),
-              elevation: 0,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
             ),
-            child: const Text(
-              'START WORKOUT',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-          ),
+          ],
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
