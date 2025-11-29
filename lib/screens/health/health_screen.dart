@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:solar_icons/solar_icons.dart';
 
@@ -56,14 +57,14 @@ class _HealthScreenState extends State<HealthScreen> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Food'),
+        title: const Text('Add Yummy Food'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
               decoration: const InputDecoration(
-                labelText: 'Food Name',
+                labelText: 'What did you eat?',
                 hintText: 'e.g., Banana',
               ),
               autofocus: true,
@@ -72,7 +73,7 @@ class _HealthScreenState extends State<HealthScreen> {
             TextField(
               controller: caloriesController,
               decoration: const InputDecoration(
-                labelText: 'Calories',
+                labelText: 'Calories (optional)',
                 hintText: 'e.g., 105',
                 suffixText: 'kcal',
               ),
@@ -87,15 +88,16 @@ class _HealthScreenState extends State<HealthScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              if (nameController.text.isNotEmpty &&
-                  caloriesController.text.isNotEmpty) {
+              if (nameController.text.isNotEmpty) {
                 setState(() {
                   if (_foodItems[_selectedMealTab] == null) {
                     _foodItems[_selectedMealTab] = [];
                   }
                   _foodItems[_selectedMealTab]!.add({
                     'name': nameController.text,
-                    'calories': '${caloriesController.text} kcal',
+                    'calories': caloriesController.text.isNotEmpty
+                        ? '${caloriesController.text} kcal'
+                        : 'Unknown',
                   });
                 });
                 Navigator.pop(context);
@@ -116,7 +118,7 @@ class _HealthScreenState extends State<HealthScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Edit Sleep Schedule'),
+          title: const Text('Sleep Schedule'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -174,9 +176,9 @@ class _HealthScreenState extends State<HealthScreen> {
     if (date.year == now.year &&
         date.month == now.month &&
         date.day == now.day) {
-      return 'Today, ${DateFormat('MMMM d').format(date)}';
+      return 'Today';
     }
-    return DateFormat('EEEE, MMMM d').format(date);
+    return DateFormat('MMM d').format(date);
   }
 
   String _calculateSleepDuration() {
@@ -209,510 +211,332 @@ class _HealthScreenState extends State<HealthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      backgroundColor: theme.colorScheme.background,
-      body: Column(
-        children: [
-          // Custom Header
-          SafeArea(
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: const Color(0xFFF0F4F8),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header with Flowy
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Row(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios, size: 18),
-                        onPressed: () => _changeDate(-1),
-                        style: IconButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: const Size(40, 40),
-                        ),
-                      ),
-                      Text(
-                        _formatDate(_selectedDate),
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.arrow_forward_ios, size: 18),
-                        onPressed: () => _changeDate(1),
-                        style: IconButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: const Size(40, 40),
-                        ),
-                      ),
-                    ],
+                  SvgPicture.asset(
+                    'assets/flowy.svg',
+                    height: 60,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Daily Log',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onBackground,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Healthy Habits',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2D3142),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.chevron_left, size: 20),
+                              onPressed: () => _changeDate(-1),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                _formatDate(_selectedDate),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF9098A3),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.chevron_right, size: 20),
+                              onPressed: () => _changeDate(1),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 24),
 
-                  // Food Intake Card
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    // Food Section
+                    _buildSectionCard(
+                      title: 'Yummy Food',
+                      icon: SolarIconsBold.hamburgerMenu,
+                      color: const Color(0xFFFF9F1C), // Orange
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: theme.colorScheme.primary
-                                          .withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      SolarIconsBold.hamburgerMenu,
-                                      size: 24,
-                                      color: theme.colorScheme.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Food Intake',
-                                        style: theme.textTheme.titleLarge
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '1250/2000 kcal',
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              color: theme
-                                                  .colorScheme
-                                                  .onSurfaceVariant,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              ElevatedButton.icon(
-                                onPressed: _showAddFoodDialog,
-                                icon: const Icon(Icons.add, size: 18),
-                                label: const Text('Add Food'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: theme.colorScheme.primary,
-                                  foregroundColor: theme.colorScheme.onPrimary,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  elevation: 0,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Progress Bar
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: LinearProgressIndicator(
-                              value: 0.625, // 1250/2000
-                              minHeight: 8,
-                              backgroundColor: theme.colorScheme.surfaceVariant,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.cyan,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Meal Type Tabs
+                          // Meal Tabs
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               children: [
-                                _buildMealTab(context, 'Breakfast'),
+                                _buildMealTab('Breakfast'),
                                 const SizedBox(width: 8),
-                                _buildMealTab(context, 'Lunch'),
+                                _buildMealTab('Lunch'),
                                 const SizedBox(width: 8),
-                                _buildMealTab(context, 'Dinner'),
+                                _buildMealTab('Dinner'),
                                 const SizedBox(width: 8),
-                                _buildMealTab(context, 'Snacks'),
+                                _buildMealTab('Snacks'),
                               ],
                             ),
                           ),
-
-                          const SizedBox(height: 20),
-
-                          // Food Items
+                          const SizedBox(height: 16),
+                          // Food List
                           ...(_foodItems[_selectedMealTab] ?? []).map(
                             (item) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _buildFoodItem(
-                                context,
-                                item['name']!,
-                                item['calories']!,
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFFFF9F1C).withValues(alpha: 0.2),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFFF9F1C).withValues(alpha: 0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.restaurant,
+                                        size: 16,
+                                        color: Color(0xFFFF9F1C),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        item['name']!,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      item['calories']!,
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: _showAddFoodDialog,
+                              icon: const Icon(Icons.add),
+                              label: const Text('Add Food'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFF9F1C),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  // Hydration Card
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
+                    // Hydration Section
+                    _buildSectionCard(
+                      title: 'Water Power',
+                      icon: Icons.water_drop,
+                      color: const Color(0xFF4ECDC4), // Teal
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.cyan.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: const Icon(
-                                      Icons.water_drop,
-                                      size: 24,
-                                      color: Colors.cyan,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'Hydration',
-                                    style: theme.textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                '${_waterIntake.toStringAsFixed(1)} / ${_waterGoal.toStringAsFixed(1)} L',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 32),
-
-                          // Circular Progress
-                          Center(
-                            child: SizedBox(
-                              width: 160,
-                              height: 160,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  SizedBox(
-                                    width: 160,
-                                    height: 160,
-                                    child: CircularProgressIndicator(
-                                      value: (_waterIntake / _waterGoal).clamp(
-                                        0.0,
-                                        1.0,
-                                      ),
-                                      strokeWidth: 14,
-                                      backgroundColor: theme
-                                          .colorScheme
-                                          .surfaceVariant
-                                          .withValues(alpha: 0.3),
-                                      valueColor:
-                                          const AlwaysStoppedAnimation<Color>(
-                                            Colors.cyan,
-                                          ),
-                                    ),
-                                  ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        '${((_waterIntake / _waterGoal) * 100).toInt()}%',
-                                        style: theme.textTheme.displaySmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                              color:
-                                                  theme.colorScheme.onSurface,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Goal',
-                                        style: theme.textTheme.bodyLarge
-                                            ?.copyWith(
-                                              color: theme
-                                                  .colorScheme
-                                                  .onSurfaceVariant,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 32),
-
-                          // Water buttons
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _buildWaterButton(context, '-', () {
-                                _updateWater(-0.25);
-                              }),
-                              const SizedBox(width: 40),
-                              _buildWaterButton(context, '+', () {
-                                _updateWater(0.25);
-                              }),
+                              Text(
+                                '${_waterIntake.toStringAsFixed(1)}L',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF4ECDC4),
+                                ),
+                              ),
+                              const Text(
+                                ' / 2.0L',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: (_waterIntake / _waterGoal).clamp(0.0, 1.0),
+                              minHeight: 20,
+                              backgroundColor: const Color(0xFF4ECDC4).withValues(alpha: 0.2),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Color(0xFF4ECDC4),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildWaterButton(Icons.remove, () => _updateWater(-0.25)),
+                              const SizedBox(width: 32),
+                              _buildWaterButton(Icons.add, () => _updateWater(0.25)),
                             ],
                           ),
                         ],
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  // Sleep Card
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
+                    // Sleep Section
+                    _buildSectionCard(
+                      title: 'Sleepy Time',
+                      icon: SolarIconsBold.moon,
+                      color: const Color(0xFF6C5CE7), // Purple
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.purple.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      SolarIconsBold.moon,
-                                      size: 24,
-                                      color: Colors.purple,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Sleep',
-                                        style: theme.textTheme.titleLarge
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'Total sleep: ${_calculateSleepDuration()}',
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              color: theme
-                                                  .colorScheme
-                                                  .onSurfaceVariant,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                              _buildSleepInfo('Bed Time', _bedTime.format(context)),
+                              Container(
+                                width: 1,
+                                height: 40,
+                                color: Colors.grey[300],
                               ),
-                              TextButton(
-                                onPressed: _showEditSleepDialog,
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                ),
-                                child: Text(
-                                  'Edit',
-                                  style: TextStyle(
-                                    color: theme.colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                              ),
+                              _buildSleepInfo('Wake Up', _wakeTime.format(context)),
                             ],
                           ),
-
-                          const SizedBox(height: 20),
-
-                          // Sleep Time Cards
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.surfaceVariant
-                                        .withValues(alpha: 0.3),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'Went to Bed',
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              color: theme
-                                                  .colorScheme
-                                                  .onSurfaceVariant,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Text(
-                                        _bedTime.format(context),
-                                        style: theme.textTheme.headlineSmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ],
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF6C5CE7).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.timelapse, color: Color(0xFF6C5CE7)),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Total Sleep: ${_calculateSleepDuration()}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF6C5CE7),
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.surfaceVariant
-                                        .withValues(alpha: 0.3),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'Wake Up',
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              color: theme
-                                                  .colorScheme
-                                                  .onSurfaceVariant,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Text(
-                                        _wakeTime.format(context),
-                                        style: theme.textTheme.headlineSmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextButton(
+                            onPressed: _showEditSleepDialog,
+                            child: const Text('Change Schedule'),
                           ),
                         ],
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 24),
-                ],
+                    
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required Widget child,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          child,
         ],
       ),
     );
   }
 
-  Widget _buildMealTab(BuildContext context, String label) {
-    final theme = Theme.of(context);
+  Widget _buildMealTab(String label) {
     final isSelected = _selectedMealTab == label;
-
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -722,87 +546,65 @@ class _HealthScreenState extends State<HealthScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? theme.colorScheme.surfaceVariant
-              : Colors.transparent,
+          color: isSelected ? const Color(0xFFFF9F1C) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? Colors.transparent : Colors.grey[300]!,
+          ),
         ),
         child: Text(
           label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.grey[600],
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFoodItem(BuildContext context, String name, String calories) {
-    final theme = Theme.of(context);
+  Widget _buildWaterButton(IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(30),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF4ECDC4),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF4ECDC4).withValues(alpha: 0.4),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: Colors.white, size: 32),
+      ),
+    );
+  }
 
-    return Row(
+  Widget _buildSleepInfo(String label, String time) {
+    return Column(
       children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(12),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 14,
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                calories,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
+        const SizedBox(height: 4),
+        Text(
+          time,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF2D3142),
           ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.more_vert, size: 20),
-          onPressed: () {},
-          color: theme.colorScheme.onSurfaceVariant,
         ),
       ],
-    );
-  }
-
-  Widget _buildWaterButton(
-    BuildContext context,
-    String label,
-    VoidCallback onPressed,
-  ) {
-    final theme = Theme.of(context);
-
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        color: Colors.cyan.withValues(alpha: 0.1),
-        shape: BoxShape.circle,
-      ),
-      child: IconButton(
-        icon: Text(
-          label,
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.cyan,
-          ),
-        ),
-        onPressed: onPressed,
-      ),
     );
   }
 }
