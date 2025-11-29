@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:solar_icons/solar_icons.dart';
+import 'food_scanner_screen.dart';
 
 // Health Screen
 class HealthScreen extends StatefulWidget {
@@ -350,20 +351,59 @@ class _HealthScreenState extends State<HealthScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: _showAddFoodDialog,
-                              icon: const Icon(Icons.add),
-                              label: const Text('Add Food'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFF9F1C),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: _showAddFoodDialog,
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('Add Food'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF9F1C),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                  ),
                                 ),
                               ),
-                            ),
+                              const SizedBox(width: 12),
+                              InkWell(
+                                onTap: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const FoodScannerScreen(),
+                                    ),
+                                  );
+                                  
+                                  if (result != null && result is Map<String, String>) {
+                                    setState(() {
+                                      if (_foodItems[_selectedMealTab] == null) {
+                                        _foodItems[_selectedMealTab] = [];
+                                      }
+                                      _foodItems[_selectedMealTab]!.add(result);
+                                    });
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF9F1C).withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: const Color(0xFFFF9F1C),
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    SolarIconsBold.scanner,
+                                    color: Color(0xFFFF9F1C),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
